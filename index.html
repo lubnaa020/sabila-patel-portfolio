@@ -1,0 +1,107 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Portfolio of Sabila Patel, an architecture student showcasing projects and qualifications." />
+  <title>Sabila Patel - Architecture Student Portfolio</title>
+  <!-- Google Fonts: Roboto -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-light-blue font-roboto text-gray-800">
+  <header class="text-center py-8 bg-white shadow-md">
+    <h1 class="text-4xl font-bold text-gray-900">Sabila Patel</h1>
+    <h2 class="text-2xl text-gray-600 mt-2">Architecture Student</h2>
+  </header>
+  <nav class="bg-gray-800 py-4" role="navigation" aria-label="Main navigation">
+    <div class="container mx-auto flex justify-center space-x-6">
+      <a href="#about" class="text-white hover:text-blue-400 transition">About</a>
+      <a href="#qualifications" class="text-white hover:text-blue-400 transition">Qualifications</a>
+      <a href="#contact" class="text-white hover:text-blue-400 transition">Contact</a>
+    </div>
+  </nav>
+  <section id="about" class="py-12 container mx-auto" aria-labelledby="about-heading">
+    <h2 id="about-heading" class="text-3xl font-bold text-center mb-6">About Me</h2>
+    <p class="text-lg leading-relaxed mx-4">
+      I’m Sabila Patel, a dedicated architecture student passionate about creating sustainable and innovative designs. Currently pursuing a degree in Architecture, I focus on blending aesthetics with functionality to shape inspiring spaces. My interests include urban planning, eco-friendly materials, and modern architectural trends.
+    </p>
+  </section>
+  <section id="qualifications" class="py-12 container mx-auto" aria-labelledby="qualifications-heading">
+    <h2 id="qualifications-heading" class="text-3xl font-bold text-center mb-6">Qualifications</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mx-4">
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold mb-2">Bachelor of Architecture</h3>
+        <p class="text-gray-600">Abu Dhabi University, 2023–2028</p>
+        <p>Studying advanced design principles, structural engineering, and sustainable architecture.</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold mb-2">Portfolio Projects</h3>
+        <p class="text-gray-600">Selected Works</p>
+        <p>Designed a sustainable community center and a modular housing concept, focusing on eco-friendly materials.</p>
+      </div>
+    </div>
+  </section>
+  <section id="contact" class="py-12 container mx-auto" aria-labelledby="contact-heading">
+    <h2 id="contact-heading" class="text-3xl font-bold text-center mb-6">Contact Me</h2>
+   <form id="contact-form" class="space-y-4" data-netlify="true">
+  <input type="hidden" name="form-name" value="contact">
+  <div>
+    <label for="name" class="block text-gray-600">Name</label>
+    <input type="text" id="name" name="name" class="w-full p-2 border rounded">
+  </div>
+  <div>
+    <label for="email" class="block text-gray-600">Email</label>
+    <input type="email" id="email" name="email" class="w-full p-2 border rounded">
+  </div>
+  <div>
+    <label for="message" class="block text-gray-600">Message</label>
+    <textarea id="message" name="message" class="w-full p-2 border rounded" rows="4"></textarea>
+  </div>
+  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Send Message</button>
+</form>
+  </section>
+  <script src="script.js"></script>
+</body>
+</html>
